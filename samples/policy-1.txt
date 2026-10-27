@@ -1,0 +1,27 @@
+Privacy Policy — Brightloop Fitness App
+Last updated: 1 September 2026
+
+1. What we collect
+We collect your name, email address, date of birth, height, weight, and workout history.
+When you connect a wearable device, we also collect heart rate, sleep and step data.
+We collect your approximate location every time you open the app.
+
+2. How we use your data
+We use your data to build personalised training plans and to improve the app.
+We may use your workout history to train our recommendation models.
+
+3. Sharing with third parties
+We share your email address and age range with advertising partners and other third parties.
+Aggregated health statistics may be sold to third parties for research and marketing purposes.
+We may disclose your location history to analytics providers and other third parties.
+If Brightloop is acquired, your data will be transferred to the new owner without further notice.
+
+4. Retention
+We keep your data for as long as your account exists and for 5 years after it is closed.
+
+5. Your rights
+You can request a copy of your data by writing to privacy@brightloop.example.
+Account deletion requests are processed within 90 days.
+
+6. Changes
+We may change this policy at any time. Continued use of the app means you accept the changes.

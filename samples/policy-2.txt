@@ -1,0 +1,23 @@
+Privacy Policy — Quietnote
+Last updated: 15 August 2026
+
+1. What we collect
+Quietnote stores the notes you write and the email address you sign up with. Nothing else.
+Notes are encrypted on your device before they are uploaded.
+
+2. How we use your data
+Your email address is used only to sign you in and to send security notices.
+We do not read your notes and we do not use them to train any models.
+
+3. Sharing
+We do not sell your data.
+Payments are handled by our payment processor, which receives only what it needs to charge your card; it is the only third party that processes your data.
+
+4. Retention
+When you delete your account, your notes and email address are erased within 30 days.
+
+5. Your rights
+You can export or delete all your data from the Settings page at any time.
+
+6. Changes
+We will email you 30 days before any change to this policy takes effect.
