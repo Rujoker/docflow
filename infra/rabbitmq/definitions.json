@@ -1,0 +1,99 @@
+{
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "docflow.commands",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "docflow.events",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "analyze-document",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "notifier.document-events",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "audit.all",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "alerts.failed",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "docflow.commands",
+      "vhost": "/",
+      "destination": "analyze-document",
+      "destination_type": "queue",
+      "routing_key": "analyze",
+      "arguments": {}
+    },
+    {
+      "source": "docflow.events",
+      "vhost": "/",
+      "destination": "notifier.document-events",
+      "destination_type": "queue",
+      "routing_key": "document.*",
+      "arguments": {}
+    },
+    {
+      "source": "docflow.events",
+      "vhost": "/",
+      "destination": "audit.all",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "docflow.events",
+      "vhost": "/",
+      "destination": "alerts.failed",
+      "destination_type": "queue",
+      "routing_key": "document.failed",
+      "arguments": {}
+    }
+  ]
+}

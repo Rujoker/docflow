@@ -95,7 +95,7 @@ Each milestone is tagged, so a tag shows the project at that step.
 | Version | Milestone | Status |
 | --- | --- | --- |
 | [v0.1.0](https://github.com/Rujoker/docflow/tree/v0.1.0) | Solution skeleton, docker-compose, CI | ✅ Done |
-| v0.2.0 | RabbitMQ topology: exchanges, bindings, durability | ⏳ |
+| [v0.2.0](https://github.com/Rujoker/docflow/tree/v0.2.0) | RabbitMQ topology: exchanges, bindings, durability | ✅ Done |
 | v0.3.0 | Document intake and analysis over RabbitMQ.Client | ⏳ |
 | v0.4.0 | Reliable publishing: publisher confirms, persistent messages, `mandatory` | ⏳ |
 | v0.5.0 | Transient vs permanent errors: Polly, DLX delayed retry, DLQ | ⏳ |
