@@ -1,7 +1,7 @@
 services:
   rabbitmq:
     image: rabbitmq:4-management
-    hostname: rabbitmq          # важно: от hostname зависит имя узла и сохранность данных
+    hostname: rabbitmq      # node name and data directory depend on hostname
     ports:
       - "5672:5672"             # AMQP
       - "15672:15672"           # management UI
