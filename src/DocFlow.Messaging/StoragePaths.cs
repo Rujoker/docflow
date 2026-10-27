@@ -13,7 +13,6 @@ public static class StoragePaths
 
     private static string? FindRepoRoot()
     {
-        // bin/Debug/net10.0 → ... → корень репозитория
         for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)
         {
             if (File.Exists(Path.Combine(dir.FullName, "DocFlow.sln")))

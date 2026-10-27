@@ -19,10 +19,21 @@ app.MapPost("/documents", async (IFormFile file, RabbitPublisher publisher, Canc
     var path = Path.Combine(storageRoot, $"{documentId}{Path.GetExtension(file.FileName)}");
 
     await using (var fs = File.Create(path))
+    {
         await file.CopyToAsync(fs, ct);
+    }
 
     var command = new AnalyzeDocument(documentId, path, file.FileName, DateTimeOffset.UtcNow);
-    await publisher.PublishAsync(Topology.CommandsExchange, Topology.AnalyzeRoutingKey, command, Guid.NewGuid(), ct);
+
+    try
+    {
+        await publisher.PublishAsync(Topology.CommandsExchange, Topology.AnalyzeRoutingKey, command, Guid.NewGuid(), ct);
+    }
+    catch (Exception ex) when (ex is not OperationCanceledException)
+    {
+        app.Logger.LogError(ex, "Failed to publish {DocumentId}", documentId);
+        return Results.Problem("Failed to publish message", statusCode: 503);
+    }
 
     return Results.Accepted($"/documents/{documentId}", new { documentId });
 }).DisableAntiforgery();
