@@ -1,7 +1,9 @@
+using DocFlow.Messaging;
 using DocFlow.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
+builder.Services.AddRabbit();
+builder.Services.AddHostedService<AnalyzeDocumentConsumer>();
 
 var host = builder.Build();
 host.Run();
