@@ -3,6 +3,7 @@ using DocFlow.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddRabbit();
+builder.Services.AddSingleton<ILlmClient, FakeLlmClient>();
 builder.Services.AddHostedService<AnalyzeDocumentConsumer>();
 
 var host = builder.Build();
