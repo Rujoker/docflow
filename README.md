@@ -70,6 +70,39 @@ docker compose down        # keep data
 docker compose down -v     # start from scratch
 ```
 
+## LLM provider
+
+The worker analyzes documents with an `ILlmClient`. Two implementations ship with the repo:
+
+| Provider | What it does | When to use |
+| --- | --- | --- |
+| `Fake` (default) | Simulated analysis with 1–3 s latency. Markers in the text trigger failures on demand: `#transient`, `#always-down`, `#poison` | Experiments and tests, no API key, no cost |
+| `Claude` | Real analysis through the [Anthropic C# SDK](https://platform.claude.com/docs/en/api/sdks/csharp) | Seeing the pipeline on real documents |
+
+Switching to Claude:
+
+1. Get an API key in the [Claude Console](https://platform.claude.com/) and set a spending limit there.
+2. Store the key outside the repository — either as a user secret:
+
+   ```bash
+   dotnet user-secrets set "Anthropic:ApiKey" "sk-ant-..." --project src/DocFlow.Worker
+   ```
+
+   or as an environment variable: `export ANTHROPIC_API_KEY=sk-ant-...`.
+3. Run the worker with the provider switched:
+
+   ```bash
+   Llm__Provider=Claude dotnet run --project src/DocFlow.Worker
+   ```
+
+   The startup log shows which provider is active. If `Claude` is selected without a key, the worker refuses to start.
+
+Model and response size are configured in `src/DocFlow.Worker/appsettings.json` (`Llm:Model`, `Llm:MaxTokens`; default `claude-haiku-5-5`).
+
+The SDK's built-in retries are switched off (`MaxRetries = 0`): retries are handled once, in the worker's own pipeline (Polly + broker-level delayed retry). Leaving both on would multiply the number of paid calls per document — see [docs/experiments/04-error-handling.md](docs/experiments/04-error-handling.md).
+
+Error mapping: 429, 5xx (including 529 Overloaded), 408, 409 and network errors become transient and are retried; 400 and 422 mean the document itself was rejected and go straight to the DLQ.
+
 ## Repository layout
 
 ```
@@ -98,7 +131,7 @@ Each milestone is tagged, so a tag shows the project at that step.
 | [v0.2.0](https://github.com/Rujoker/docflow/tree/v0.2.0) | RabbitMQ topology: exchanges, bindings, durability | ✅ Done |
 | [v0.3.0](https://github.com/Rujoker/docflow/tree/v0.3.0) | Document intake and analysis over RabbitMQ.Client | ✅ Done |
 | [v0.4.0](https://github.com/Rujoker/docflow/tree/v0.4.0) | Reliable publishing: publisher confirms, persistent messages, `mandatory` | ✅ Done |
-| v0.5.0 | Transient vs permanent errors: Polly, DLX delayed retry, DLQ | ⏳ |
+| [v0.5.0](https://github.com/Rujoker/docflow/tree/v0.5.0) | Transient vs permanent errors: Polly, DLX delayed retry, DLQ | ✅ Done |
 | v0.6.0 | Transactional outbox | ⏳ |
 | v0.7.0 | Idempotent consumer (inbox), domain events, Notifier | ⏳ |
 | v0.8.0 | MassTransit v8 variant for comparison (branch `masstransit`) | ⏳ |
