@@ -16,5 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DocFlow.Contracts\DocFlow.Contracts.csproj" />
     <ProjectReference Include="..\DocFlow.Messaging\DocFlow.Messaging.csproj" />
+    <ProjectReference Include="..\DocFlow.Persistence\DocFlow.Persistence.csproj" />
   </ItemGroup>
 </Project>

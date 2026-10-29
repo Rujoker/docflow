@@ -1,9 +1,16 @@
 using DocFlow.Contracts;
 using DocFlow.Messaging;
+using DocFlow.Persistence;
+using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRabbit();
+builder.Services.AddDbContext<DocFlowDbContext>(o => o
+    .UseNpgsql(builder.Configuration.GetConnectionString("DocFlow"))
+    .UseSnakeCaseNamingConvention());
+builder.Services.AddHostedService<OutboxRelay>();
+
 var app = builder.Build();
 
 await using (var channel = await app.Services.GetRequiredService<IConnection>().CreateChannelAsync())
@@ -13,7 +20,7 @@ var storageRoot = StoragePaths.Resolve(app.Configuration["Storage:Root"] ?? "sto
 Directory.CreateDirectory(storageRoot);
 app.Logger.LogInformation("Storage root: {StorageRoot}", storageRoot);
 
-app.MapPost("/documents", async (IFormFile file, RabbitPublisher publisher, CancellationToken ct) =>
+app.MapPost("/documents", async (IFormFile file, DocFlowDbContext db, CancellationToken ct) =>
 {
     var documentId = Guid.NewGuid();
     var path = Path.Combine(storageRoot, $"{documentId}{Path.GetExtension(file.FileName)}");
@@ -23,19 +30,19 @@ app.MapPost("/documents", async (IFormFile file, RabbitPublisher publisher, Canc
         await file.CopyToAsync(fs, ct);
     }
 
-    var command = new AnalyzeDocument(documentId, path, file.FileName, DateTimeOffset.UtcNow);
-
-    try
+    db.Documents.Add(new Document
     {
-        await publisher.PublishAsync(Topology.CommandsExchange, Topology.AnalyzeRoutingKey, command, Guid.NewGuid(), ct);
-    }
-    catch (Exception ex) when (ex is not OperationCanceledException)
-    {
-        app.Logger.LogError(ex, "Failed to publish {DocumentId}", documentId);
-        return Results.Problem("Failed to publish message", statusCode: 503);
-    }
+        Id = documentId, FileName = file.FileName, StoragePath = path,
+        Status = DocumentStatus.Pending, CreatedAt = DateTimeOffset.UtcNow
+    });
+    db.OutboxMessages.Add(OutboxMessage.Create(Topology.CommandsExchange, Topology.AnalyzeRoutingKey,
+        new AnalyzeDocument(documentId, path, file.FileName, DateTimeOffset.UtcNow)));
 
+    await db.SaveChangesAsync(ct);
     return Results.Accepted($"/documents/{documentId}", new { documentId });
 }).DisableAntiforgery();
+
+app.MapGet("/documents/{id:guid}", async (Guid id, DocFlowDbContext db) =>
+    await db.Documents.FindAsync(id) is { } doc ? Results.Ok(doc) : Results.NotFound());
 
 app.Run();
