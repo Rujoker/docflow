@@ -1,14 +1,11 @@
 using DocFlow.Contracts;
 using DocFlow.Messaging;
 using DocFlow.Persistence;
-using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRabbit();
-builder.Services.AddDbContext<DocFlowDbContext>(o => o
-    .UseNpgsql(builder.Configuration.GetConnectionString("DocFlow"))
-    .UseSnakeCaseNamingConvention());
+builder.Services.AddDocFlowPersistence(builder.Configuration);
 builder.Services.AddHostedService<OutboxRelay>();
 
 var app = builder.Build();

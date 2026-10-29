@@ -1,10 +1,13 @@
 using DocFlow.Messaging;
+using DocFlow.Persistence;
 using DocFlow.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddRabbit();
+builder.Services.AddDocFlowPersistence(builder.Configuration);
 builder.Services.AddLlmClient(builder.Configuration);
 builder.Services.AddHostedService<AnalyzeDocumentConsumer>();
+builder.Services.AddHostedService<OutboxRelay>();
 
 var host = builder.Build();
 

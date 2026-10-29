@@ -38,15 +38,24 @@ public sealed class OutboxMessage
     };
 }
 
+public sealed class ProcessedMessage
+{
+    public Guid MessageId { get; set; }
+    public required string Consumer { get; set; }
+    public DateTimeOffset ProcessedAt { get; set; }
+}
+
 public sealed class DocFlowDbContext(DbContextOptions<DocFlowDbContext> options) : DbContext(options)
 {
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
         b.Entity<Document>().Property(d => d.Status).HasConversion<string>();
         b.Entity<OutboxMessage>().Property(m => m.Payload).HasColumnType("jsonb");
         b.Entity<OutboxMessage>().HasIndex(m => m.CreatedAt).HasFilter("processed_at IS NULL");
+        b.Entity<ProcessedMessage>().HasKey(p => new { p.MessageId, p.Consumer });
     }
 }
