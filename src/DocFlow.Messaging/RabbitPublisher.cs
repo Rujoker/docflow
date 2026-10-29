@@ -21,6 +21,20 @@ public sealed class RabbitPublisher(IConnection connection) : IAsyncDisposable
 
         return PublishCoreAsync(exchange, routingKey, props, JsonSerializer.SerializeToUtf8Bytes(message), ct);
     }
+    
+    public Task PublishRawAsync(string exchange, string routingKey, string type, ReadOnlyMemory<byte> body,
+        Guid messageId, CancellationToken ct = default)
+    {
+        var props = new BasicProperties
+        {
+            MessageId = messageId.ToString(),
+            ContentType = "application/json",
+            Type = type,
+            Persistent = true
+        };
+    
+        return PublishCoreAsync(exchange, routingKey, props, body, ct);
+    }
 
     public Task PublishToDeadLetterAsync(ReadOnlyMemory<byte> body, IReadOnlyBasicProperties original,
         Exception error, long attempts, CancellationToken ct = default)
