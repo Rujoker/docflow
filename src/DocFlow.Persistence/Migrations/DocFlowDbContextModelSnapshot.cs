@@ -110,6 +110,26 @@ namespace DocFlow.Persistence.Migrations
 
                     b.ToTable("outbox_messages", (string)null);
                 });
+
+            modelBuilder.Entity("DocFlow.Persistence.ProcessedMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<string>("Consumer")
+                        .HasColumnType("text")
+                        .HasColumnName("consumer");
+
+                    b.Property<DateTimeOffset>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.HasKey("MessageId", "Consumer")
+                        .HasName("pk_processed_messages");
+
+                    b.ToTable("processed_messages", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }

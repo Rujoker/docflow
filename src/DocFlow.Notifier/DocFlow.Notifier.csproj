@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-DocFlow.Notifier-4c6b7354-55ac-488c-96c7-014290efae3d</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DocFlow.Contracts\DocFlow.Contracts.csproj" />
+    <ProjectReference Include="..\DocFlow.Messaging\DocFlow.Messaging.csproj" />
+    <ProjectReference Include="..\DocFlow.Persistence\DocFlow.Persistence.csproj" />
+  </ItemGroup>
+</Project>

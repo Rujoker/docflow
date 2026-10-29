@@ -108,8 +108,11 @@ Error mapping: 429, 5xx (including 529 Overloaded), 408, 409 and network errors 
 ```
 src/
   DocFlow.Contracts/   message contracts shared by all services
+  DocFlow.Messaging/   RabbitMQ topology and publisher
+  DocFlow.Persistence/ EF Core model, migrations, outbox relay
   DocFlow.Api/         document intake (HTTP)
   DocFlow.Worker/      document analysis (background consumer)
+  DocFlow.Notifier/    reacts to document events
 tests/
   DocFlow.Tests/       integration tests
 samples/               test documents, including failure triggers
@@ -133,7 +136,7 @@ Each milestone is tagged, so a tag shows the project at that step.
 | [v0.4.0](https://github.com/Rujoker/docflow/tree/v0.4.0) | Reliable publishing: publisher confirms, persistent messages, `mandatory` | ✅ Done |
 | [v0.5.0](https://github.com/Rujoker/docflow/tree/v0.5.0) | Transient vs permanent errors: Polly, DLX delayed retry, DLQ | ✅ Done |
 | [v0.6.0](https://github.com/Rujoker/docflow/tree/v0.6.0) | Transactional outbox | ✅ Done |
-| v0.7.0 | Idempotent consumer (inbox), domain events, Notifier | ⏳ |
+| [v0.7.0](https://github.com/Rujoker/docflow/tree/v0.7.0) | Idempotent consumer (inbox), domain events, Notifier | ✅ Done |
 | v0.8.0 | MassTransit v8 variant for comparison (branch `masstransit`) | ⏳ |
 | v0.9.0 | Integration tests with Testcontainers | ⏳ |
 | v0.10.0 | Distributed tracing with OpenTelemetry and Jaeger | ⏳ |
