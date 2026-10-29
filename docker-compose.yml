@@ -1,10 +1,10 @@
 services:
   rabbitmq:
     image: rabbitmq:4-management
-    hostname: rabbitmq      # node name and data directory depend on hostname
+    hostname: rabbitmq  # node name and data directory depend on hostname
     ports:
-      - "5672:5672"             # AMQP
-      - "15672:15672"           # management UI
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # management UI
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 

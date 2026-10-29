@@ -8,9 +8,16 @@ using Microsoft.Extensions.Logging;
 
 namespace DocFlow.Persistence;
 
-public sealed class OutboxRelay(IServiceScopeFactory scopes, RabbitPublisher publisher,
-    IConfiguration config, ILogger<OutboxRelay> logger) : BackgroundService
+public sealed class OutboxRelay(
+    IServiceScopeFactory scopes,
+    RabbitPublisher publisher,
+    IConfiguration configuration,
+    ILogger<OutboxRelay> logger) : BackgroundService
 {
+    private const int BatchSize = 20;
+    private const string CrashAfterPublishKey = "Chaos:CrashAfterPublish";
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(1);
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
@@ -26,7 +33,7 @@ public sealed class OutboxRelay(IServiceScopeFactory scopes, RabbitPublisher pub
             }
 
             if (published == 0)
-                await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+                await Task.Delay(PollInterval, stoppingToken);
         }
     }
 
@@ -34,24 +41,35 @@ public sealed class OutboxRelay(IServiceScopeFactory scopes, RabbitPublisher pub
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DocFlowDbContext>();
-        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
         var batch = await db.OutboxMessages
-            .FromSql($"SELECT * FROM outbox_messages WHERE processed_at IS NULL ORDER BY created_at LIMIT 20 FOR UPDATE SKIP LOCKED")
+            .FromSql($"""
+                SELECT * FROM outbox_messages
+                WHERE processed_at IS NULL
+                ORDER BY created_at
+                LIMIT {BatchSize}
+                FOR UPDATE SKIP LOCKED
+                """)
             .ToListAsync(ct);
 
         foreach (var message in batch)
         {
-            await publisher.PublishRawAsync(message.Exchange, message.RoutingKey, message.Type,
-                Encoding.UTF8.GetBytes(message.Payload), message.Id, ct);
+            await publisher.PublishAsync(
+                message.Exchange,
+                message.RoutingKey,
+                message.Type,
+                Encoding.UTF8.GetBytes(message.Payload),
+                message.Id,
+                ct);
             message.ProcessedAt = DateTimeOffset.UtcNow;
 
-            if (config.GetValue<bool>("Chaos:CrashAfterPublish"))
+            if (configuration.GetValue<bool>(CrashAfterPublishKey))
                 Environment.FailFast("Chaos: crashed after publish, before commit");
         }
 
         await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
+        await transaction.CommitAsync(ct);
         return batch.Count;
     }
 }

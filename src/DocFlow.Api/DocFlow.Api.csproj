@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <ItemGroup>
-    <ProjectReference Include="..\DocFlow.Contracts\DocFlow.Contracts.csproj" />
-    <ProjectReference Include="..\DocFlow.Messaging\DocFlow.Messaging.csproj" />
-    <ProjectReference Include="..\DocFlow.Persistence\DocFlow.Persistence.csproj" />
-  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
@@ -13,10 +13,10 @@
     </PackageReference>
   </ItemGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DocFlow.Contracts\DocFlow.Contracts.csproj" />
+    <ProjectReference Include="..\DocFlow.Messaging\DocFlow.Messaging.csproj" />
+    <ProjectReference Include="..\DocFlow.Persistence\DocFlow.Persistence.csproj" />
+  </ItemGroup>
 
 </Project>
