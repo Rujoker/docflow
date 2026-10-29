@@ -1,4 +1,4 @@
-﻿namespace DocFlow.Contracts;
+namespace DocFlow.Contracts;
 
 public sealed record AnalyzeDocument(
     Guid DocumentId,

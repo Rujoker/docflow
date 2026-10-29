@@ -2,9 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-DocFlow.Notifier-4c6b7354-55ac-488c-96c7-014290efae3d</UserSecretsId>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,4 +15,5 @@
     <ProjectReference Include="..\DocFlow.Messaging\DocFlow.Messaging.csproj" />
     <ProjectReference Include="..\DocFlow.Persistence\DocFlow.Persistence.csproj" />
   </ItemGroup>
+
 </Project>
