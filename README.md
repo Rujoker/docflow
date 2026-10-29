@@ -132,7 +132,7 @@ Each milestone is tagged, so a tag shows the project at that step.
 | [v0.3.0](https://github.com/Rujoker/docflow/tree/v0.3.0) | Document intake and analysis over RabbitMQ.Client | ✅ Done |
 | [v0.4.0](https://github.com/Rujoker/docflow/tree/v0.4.0) | Reliable publishing: publisher confirms, persistent messages, `mandatory` | ✅ Done |
 | [v0.5.0](https://github.com/Rujoker/docflow/tree/v0.5.0) | Transient vs permanent errors: Polly, DLX delayed retry, DLQ | ✅ Done |
-| v0.6.0 | Transactional outbox | ⏳ |
+| [v0.6.0](https://github.com/Rujoker/docflow/tree/v0.6.0) | Transactional outbox | ✅ Done |
 | v0.7.0 | Idempotent consumer (inbox), domain events, Notifier | ⏳ |
 | v0.8.0 | MassTransit v8 variant for comparison (branch `masstransit`) | ⏳ |
 | v0.9.0 | Integration tests with Testcontainers | ⏳ |
