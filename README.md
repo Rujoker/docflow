@@ -39,15 +39,15 @@ flowchart LR
     Q -. failed for good .-> DLQ[analyze-document.dlq]
 ```
 
-Today only the solution skeleton and infrastructure exist; the rest lands milestone by milestone.
+Everything up to the Notifier is implemented; the Kafka bridge and analytics land in the next milestone.
 
 ## How to run
 
 Prerequisites: .NET 10 SDK, Docker Desktop.
 
 ```bash
-docker compose up -d      # RabbitMQ + PostgreSQL
-docker compose ps         # both containers should be running
+docker compose up -d      # RabbitMQ, PostgreSQL, Jaeger
+docker compose ps         # all containers should be running
 dotnet build
 ```
 
@@ -56,6 +56,7 @@ dotnet build
 | RabbitMQ management UI | http://localhost:15672 | `guest` / `guest` |
 | RabbitMQ AMQP | `localhost:5672` | `guest` / `guest` |
 | PostgreSQL | `localhost:5432` | `docflow` / `docflow`, db `docflow` |
+| Jaeger UI | http://localhost:16686 | — |
 
 Postgres shell without a separate client:
 
@@ -103,12 +104,18 @@ The SDK's built-in retries are switched off (`MaxRetries = 0`): retries are hand
 
 Error mapping: 429, 5xx (including 529 Overloaded), 408, 409 and network errors become transient and are retried; 400 and 422 mean the document itself was rejected and go straight to the DLQ.
 
+## Tracing
+
+Every document is one trace across the API, the outbox, RabbitMQ, the worker and the Notifier, including broker-level retries. Open http://localhost:16686, pick `docflow-api` and operation `POST /documents`; failed documents are found with `error=true`. How the trace is carried through the outbox: [docs/experiments/09-tracing.md](docs/experiments/09-tracing.md).
+
+![Trace of one document in Jaeger](docs/images/trace.png)
+
 ## Repository layout
 
 ```
 src/
   DocFlow.Contracts/   message contracts shared by all services
-  DocFlow.Messaging/   RabbitMQ topology and publisher
+  DocFlow.Messaging/   RabbitMQ topology, publisher, tracing setup
   DocFlow.Persistence/ EF Core model, migrations, outbox relay
   DocFlow.Api/         document intake (HTTP)
   DocFlow.Worker/      document analysis (background consumer)
@@ -137,9 +144,9 @@ Each milestone is tagged, so a tag shows the project at that step.
 | [v0.5.0](https://github.com/Rujoker/docflow/tree/v0.5.0) | Transient vs permanent errors: Polly, DLX delayed retry, DLQ | ✅ Done |
 | [v0.6.0](https://github.com/Rujoker/docflow/tree/v0.6.0) | Transactional outbox | ✅ Done |
 | [v0.7.0](https://github.com/Rujoker/docflow/tree/v0.7.0) | Idempotent consumer (inbox), domain events, Notifier | ✅ Done |
-| v0.8.0 | MassTransit v8 variant for comparison (branch `masstransit`) | ⏳ |
-| v0.9.0 | Integration tests with Testcontainers | ⏳ |
-| v0.10.0 | Distributed tracing with OpenTelemetry and Jaeger | ⏳ |
+| [v0.8.0](https://github.com/Rujoker/docflow/tree/v0.8.0) | MassTransit v8 variant for comparison (branch `masstransit`) | ✅ Done |
+| [v0.9.0](https://github.com/Rujoker/docflow/tree/v0.9.0) | Integration tests with Testcontainers | ✅ Done |
+| [v0.10.0](https://github.com/Rujoker/docflow/tree/v0.10.0) | Distributed tracing with OpenTelemetry and Jaeger | ✅ Done |
 | v0.11.0 | Kafka for analytics: partitioning, consumer groups, replay | ⏳ |
 | v1.0.0 | Delivery guarantees write-up | ⏳ |
 

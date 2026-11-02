@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using DocFlow.Messaging;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry;
 
 namespace DocFlow.Persistence;
 
@@ -41,6 +43,8 @@ public sealed class OutboxRelay(
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DocFlowDbContext>();
+
+        using var untraced = SuppressInstrumentationScope.Begin();
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
         var batch = await db.OutboxMessages
@@ -55,6 +59,9 @@ public sealed class OutboxRelay(
 
         foreach (var message in batch)
         {
+            using var traced = SuppressInstrumentationScope.Begin(false);
+            using var activity = Telemetry.Source.StartActivity("outbox publish", ActivityKind.Producer, message.TraceParent);
+
             await publisher.PublishAsync(
                 message.Exchange,
                 message.RoutingKey,

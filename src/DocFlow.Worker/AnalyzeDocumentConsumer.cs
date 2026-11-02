@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using DocFlow.Contracts;
@@ -79,6 +80,7 @@ public sealed class AnalyzeDocumentConsumer(
         }
         catch (Exception ex) when (IsTransient(ex) && attempt <= MaxRetries)
         {
+            Activity.Current.RecordError(ex);
             logger.LogWarning(
                 "Transient failure on attempt {Attempt}, retry in {RetryDelay}: {Error}",
                 attempt, Topology.RetryDelay, ex.Message);
@@ -86,6 +88,7 @@ public sealed class AnalyzeDocumentConsumer(
         }
         catch (Exception ex)
         {
+            Activity.Current.RecordError(ex);
             logger.LogError(
                 ex,
                 "Giving up on message {MessageId} after {Attempt} attempts",
@@ -120,7 +123,25 @@ public sealed class AnalyzeDocumentConsumer(
         }
 
         var text = await File.ReadAllTextAsync(command.StoragePath, ct);
-        var result = await Resilience.ExecuteAsync(async token => await llm.AnalyzeAsync(text, token), ct);
+
+        var llmAttempt = 0;
+        var result = await Resilience.ExecuteAsync(async token =>
+        {
+            using var activity = Telemetry.Source.StartActivity("llm analyze");
+            activity?.SetTag("document.id", command.DocumentId);
+            activity?.SetTag("delivery.attempt", attempt);
+            activity?.SetTag("llm.attempt", ++llmAttempt);
+
+            try
+            {
+                return await llm.AnalyzeAsync(text, token);
+            }
+            catch (Exception ex)
+            {
+                activity.RecordError(ex);
+                throw;
+            }
+        }, ct);
 
         if (configuration.GetValue<bool>(CrashBeforeCommitKey))
             Environment.FailFast("Chaos: crashed after the LLM call, before commit");

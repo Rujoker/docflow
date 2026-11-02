@@ -1,11 +1,11 @@
 using DocFlow.Messaging;
-using DocFlow.Persistence;
 using DocFlow.Worker;
 using DocFlow.Worker.Llm;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddWorker(builder.Configuration);
+builder.Services.AddTracing("docflow-worker");
 var host = builder.Build();
 
 var llmOptions = host.Services.GetRequiredService<LlmOptions>();

@@ -3,6 +3,7 @@ using DocFlow.Api;
 using DocFlow.Contracts;
 using DocFlow.Messaging;
 using DocFlow.Persistence;
+using OpenTelemetry.Trace;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddHostedService<OutboxRelay>();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddTracing("docflow-api", tracing => tracing.AddAspNetCoreInstrumentation());
 
 var app = builder.Build();
 

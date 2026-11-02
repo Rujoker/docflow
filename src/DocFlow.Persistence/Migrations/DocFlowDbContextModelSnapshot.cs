@@ -96,6 +96,10 @@ namespace DocFlow.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("routing_key");
 
+                    b.Property<string>("TraceParent")
+                        .HasColumnType("text")
+                        .HasColumnName("trace_parent");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text")

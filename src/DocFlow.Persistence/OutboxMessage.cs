@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace DocFlow.Persistence;
@@ -11,6 +12,7 @@ public sealed class OutboxMessage
     public required string Payload { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? ProcessedAt { get; set; }
+    public string? TraceParent { get; set; }
 
     public static OutboxMessage Create<T>(string exchange, string routingKey, T message) => new()
     {
@@ -19,6 +21,7 @@ public sealed class OutboxMessage
         RoutingKey = routingKey,
         Type = typeof(T).Name,
         Payload = JsonSerializer.Serialize(message),
-        CreatedAt = DateTimeOffset.UtcNow
+        CreatedAt = DateTimeOffset.UtcNow,
+        TraceParent = Activity.Current?.Id
     };
 }
