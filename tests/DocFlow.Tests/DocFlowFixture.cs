@@ -1,4 +1,3 @@
-using DocFlow.Messaging;
 using DocFlow.Persistence;
 using DocFlow.Worker;
 using DocFlow.Worker.Llm;
@@ -6,7 +5,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using RabbitMQ.Client;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 
@@ -34,11 +32,6 @@ public sealed class DocFlowFixture : IAsyncLifetime
         await using (var scope = Api.Services.CreateAsyncScope())
         {
             await scope.ServiceProvider.GetRequiredService<DocFlowDbContext>().Database.MigrateAsync();
-        }
-
-        await using (var channel = await Api.Services.GetRequiredService<IConnection>().CreateChannelAsync())
-        {
-            await Topology.DeclareNotifierAsync(channel);
         }
 
         var workerBuilder = Host.CreateApplicationBuilder();

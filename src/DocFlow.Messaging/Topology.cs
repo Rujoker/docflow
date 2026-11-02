@@ -22,6 +22,8 @@ public static class Topology
     public const string NotifierQueue = "notifier.document-events";
     public const string NotifierBindingKey = "document.*";
 
+    public static bool IsEventExchange(string exchange) => exchange == EventsExchange;
+
     public static async Task DeclareAsync(IChannel channel, CancellationToken ct = default)
     {
         await channel.ExchangeDeclareAsync(CommandsExchange, ExchangeType.Direct, durable: true, cancellationToken: ct);

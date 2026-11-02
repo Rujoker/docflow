@@ -61,6 +61,7 @@ public sealed class OutboxRelay(
                 message.Type,
                 Encoding.UTF8.GetBytes(message.Payload),
                 message.Id,
+                mandatory: !Topology.IsEventExchange(message.Exchange),
                 ct);
             message.ProcessedAt = DateTimeOffset.UtcNow;
 

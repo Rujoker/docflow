@@ -20,6 +20,7 @@ public sealed class RabbitPublisher(IConnection connection) : IAsyncDisposable
         string messageType,
         ReadOnlyMemory<byte> body,
         Guid messageId,
+        bool mandatory = true,
         CancellationToken ct = default)
     {
         var properties = new BasicProperties
@@ -30,7 +31,7 @@ public sealed class RabbitPublisher(IConnection connection) : IAsyncDisposable
             Persistent = true
         };
 
-        return PublishCoreAsync(exchange, routingKey, properties, body, ct);
+        return PublishCoreAsync(exchange, routingKey, mandatory, properties, body, ct);
     }
 
     public Task PublishToDeadLetterAsync(
@@ -55,7 +56,7 @@ public sealed class RabbitPublisher(IConnection connection) : IAsyncDisposable
             }
         };
 
-        return PublishCoreAsync(Topology.DeadLetterExchange, routingKey: string.Empty, properties, body, ct);
+        return PublishCoreAsync(Topology.DeadLetterExchange, routingKey: string.Empty, mandatory: true, properties, body, ct);
     }
 
     public async ValueTask DisposeAsync()
@@ -69,6 +70,7 @@ public sealed class RabbitPublisher(IConnection connection) : IAsyncDisposable
     private async Task PublishCoreAsync(
         string exchange,
         string routingKey,
+        bool mandatory,
         BasicProperties properties,
         ReadOnlyMemory<byte> body,
         CancellationToken ct)
@@ -80,7 +82,7 @@ public sealed class RabbitPublisher(IConnection connection) : IAsyncDisposable
             await channel.BasicPublishAsync(
                 exchange,
                 routingKey,
-                mandatory: true,
+                mandatory,
                 basicProperties: properties,
                 body: body,
                 cancellationToken: ct);

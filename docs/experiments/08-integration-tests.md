@@ -23,9 +23,9 @@ First run: the three tests that upload through `POST /documents` stayed `Pending
 
 Cause: the API and the worker share the `outbox_messages` table. The relay publishes with `mandatory: true` and publisher confirms, so an unroutable message throws, and the whole batch is rolled back and retried a second later. In the tests the Notifier wasn't running, so nothing was bound to `docflow.events` for `document.analyzed`. The first `DocumentAnalyzed` event became unroutable, stayed at the head of the outbox (ordered by `created_at`), and every row behind it — including the `AnalyzeDocument` commands from uploads — was never published.
 
-Fix in the tests: the fixture declares the Notifier topology (`Topology.DeclareNotifierAsync`), as in production where the Notifier exists. After that all 7 tests passed.
+The same would happen in production whenever an event has no subscriber, e.g. before the Notifier has ever started: one row stops the whole outbox (head-of-line blocking).
 
-In production the same thing happens if an event has no subscriber, e.g. before the Notifier has ever started: one poison row stops the whole outbox (head-of-line blocking). Possible fixes: publish events without `mandatory` (no subscribers is not an error for an event), or mark a failing row and move on instead of rolling back the batch.
+Fix: the relay publishes to `docflow.events` without `mandatory` (`Topology.IsEventExchange`). An event nobody is subscribed to is not an error — RabbitMQ drops it. Commands stay `mandatory`: an unroutable command is a misconfiguration and should stop the relay loudly rather than lose the command. The test fixture doesn't declare the Notifier topology, so every run reproduces the original situation; the upload tests passing after the first `DocumentAnalyzed` event is the regression test.
 
 ## Does the duplicate test catch a broken guard?
 
