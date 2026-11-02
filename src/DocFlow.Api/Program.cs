@@ -3,28 +3,41 @@ using DocFlow.Api;
 using DocFlow.Contracts;
 using DocFlow.Messaging;
 using DocFlow.Persistence;
+using MassTransit;
+using MassTransit.EntityFrameworkCoreIntegration;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRabbitMq(builder.Configuration);
 builder.Services.AddPersistence(builder.Configuration);
-builder.Services.AddHostedService<OutboxRelay>();
+builder.Services.AddMassTransit(bus =>
+{
+    bus.AddEntityFrameworkOutbox<DocFlowDbContext>(outbox =>
+    {
+        outbox.UsePostgres();
+        outbox.UseBusOutbox();
+    });
+
+    bus.UsingRabbitMq((context, rabbit) =>
+    {
+        rabbit.UseDocFlowHost(builder.Configuration);
+        rabbit.ConfigureEndpoints(context);
+    });
+});
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 var app = builder.Build();
 
-await using (var channel = await app.Services.GetRequiredService<IConnection>().CreateChannelAsync())
-{
-    await Topology.DeclareAsync(channel);
-}
-
 var storageRoot = StoragePaths.Resolve(app.Configuration["Storage:Root"] ?? "storage");
 Directory.CreateDirectory(storageRoot);
 app.Logger.LogInformation("Storage root: {StorageRoot}", storageRoot);
 
-app.MapPost("/documents", async (IFormFile file, DocFlowDbContext db, CancellationToken ct) =>
+app.MapPost("/documents", async (
+    IFormFile file,
+    DocFlowDbContext db,
+    ISendEndpointProvider sendEndpoints,
+    CancellationToken ct) =>
 {
     var documentId = Guid.NewGuid();
     var storagePath = Path.Combine(storageRoot, $"{documentId}{Path.GetExtension(file.FileName)}");
@@ -43,10 +56,8 @@ app.MapPost("/documents", async (IFormFile file, DocFlowDbContext db, Cancellati
         Status = DocumentStatus.Pending,
         CreatedAt = createdAt
     });
-    db.OutboxMessages.Add(OutboxMessage.Create(
-        Topology.CommandsExchange,
-        Topology.AnalyzeRoutingKey,
-        new AnalyzeDocument(documentId, storagePath, file.FileName, createdAt)));
+    var endpoint = await sendEndpoints.GetSendEndpoint(new Uri($"queue:{BusConfiguration.AnalyzeDocumentQueue}"));
+    await endpoint.Send(new AnalyzeDocument(documentId, storagePath, file.FileName, createdAt), ct);
 
     await db.SaveChangesAsync(ct);
     return Results.Accepted($"/documents/{documentId}", new { documentId });

@@ -1,6 +1,6 @@
 services:
   rabbitmq:
-    image: rabbitmq:4-management
+    image: masstransit/rabbitmq
     hostname: rabbitmq  # node name and data directory depend on hostname
     ports:
       - "5672:5672"    # AMQP
