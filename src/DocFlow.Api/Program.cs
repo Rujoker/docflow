@@ -58,3 +58,5 @@ app.MapGet("/documents/{id:guid}", async (Guid id, DocFlowDbContext db, Cancella
         : Results.NotFound());
 
 app.Run();
+
+public partial class Program;

@@ -5,12 +5,7 @@ using DocFlow.Worker.Llm;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddRabbitMq(builder.Configuration);
-builder.Services.AddPersistence(builder.Configuration);
-builder.Services.AddLlmClient(builder.Configuration);
-builder.Services.AddHostedService<AnalyzeDocumentConsumer>();
-builder.Services.AddHostedService<OutboxRelay>();
-
+builder.Services.AddWorker(builder.Configuration);
 var host = builder.Build();
 
 var llmOptions = host.Services.GetRequiredService<LlmOptions>();
