@@ -48,6 +48,7 @@ app.MapPost("/documents", async (IFormFile file, DocFlowDbContext db, Cancellati
     db.OutboxMessages.Add(OutboxMessage.Create(
         Topology.CommandsExchange,
         Topology.AnalyzeRoutingKey,
+        documentId,
         new AnalyzeDocument(documentId, storagePath, file.FileName, createdAt)));
 
     await db.SaveChangesAsync(ct);

@@ -57,6 +57,7 @@ dotnet build
 | RabbitMQ AMQP | `localhost:5672` | `guest` / `guest` |
 | PostgreSQL | `localhost:5432` | `docflow` / `docflow`, db `docflow` |
 | Jaeger UI | http://localhost:16686 | — |
+| Kafka Connect (Debezium) REST | http://localhost:8083 | — |
 
 Postgres shell without a separate client:
 
@@ -148,6 +149,7 @@ Each milestone is tagged, so a tag shows the project at that step.
 | [v0.9.0](https://github.com/Rujoker/docflow/tree/v0.9.0) | Integration tests with Testcontainers | ✅ Done |
 | [v0.10.0](https://github.com/Rujoker/docflow/tree/v0.10.0) | Distributed tracing with OpenTelemetry and Jaeger | ✅ Done |
 | [v0.11.0](https://github.com/Rujoker/docflow/tree/v0.11.0) | Kafka for analytics: partitioning, consumer groups, replay | ✅ Done |
+| [v0.12.0](https://github.com/Rujoker/docflow/tree/v0.12.0) | Debezium CDC for outbox events, duplicate-safe analytics | ✅ Done |
 | v1.0.0 | Delivery guarantees write-up | ⏳ |
 
 ## Notes on scope

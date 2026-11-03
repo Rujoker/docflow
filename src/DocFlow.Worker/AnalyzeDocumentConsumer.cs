@@ -156,6 +156,7 @@ public sealed class AnalyzeDocumentConsumer(
         db.OutboxMessages.Add(OutboxMessage.Create(
             Topology.EventsExchange,
             Topology.DocumentAnalyzedRoutingKey,
+            document.Id,
             new DocumentAnalyzed(document.Id, result.IssuesFound, result.Summary, analyzedAt)));
 
         try
@@ -186,6 +187,7 @@ public sealed class AnalyzeDocumentConsumer(
             db.OutboxMessages.Add(OutboxMessage.Create(
                 Topology.EventsExchange,
                 Topology.DocumentFailedRoutingKey,
+                documentId,
                 new DocumentFailed(documentId, error.Message, DateTimeOffset.UtcNow)));
 
             await db.SaveChangesAsync(ct);
