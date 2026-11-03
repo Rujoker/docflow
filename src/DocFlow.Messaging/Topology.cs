@@ -22,6 +22,9 @@ public static class Topology
     public const string NotifierQueue = "notifier.document-events";
     public const string NotifierBindingKey = "document.*";
 
+    public const string KafkaBridgeQueue = "kafka-bridge.document-events";
+    public const string KafkaBridgeBindingKey = "document.*";
+
     public static bool IsEventExchange(string exchange) => exchange == EventsExchange;
 
     public static async Task DeclareAsync(IChannel channel, CancellationToken ct = default)
@@ -73,5 +76,12 @@ public static class Topology
             autoDelete: false,
             arguments: arguments,
             cancellationToken: ct);
+    }
+
+    public static async Task DeclareKafkaBridgeAsync(IChannel channel, CancellationToken ct = default)
+    {
+        await DeclareEventsExchangeAsync(channel, ct);
+        await DeclareQuorumQueueAsync(channel, KafkaBridgeQueue, deadLetterExchange: null, messageTtl: null, ct);
+        await channel.QueueBindAsync(KafkaBridgeQueue, EventsExchange, KafkaBridgeBindingKey, cancellationToken: ct);
     }
 }

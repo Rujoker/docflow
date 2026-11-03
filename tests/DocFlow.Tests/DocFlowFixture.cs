@@ -12,8 +12,8 @@ namespace DocFlow.Tests;
 
 public sealed class DocFlowFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder().WithImage("postgres:17").Build();
-    private readonly RabbitMqContainer _rabbitMq = new RabbitMqBuilder().WithImage("rabbitmq:4-management").Build();
+    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17").Build();
+    private readonly RabbitMqContainer _rabbitMq = new RabbitMqBuilder("rabbitmq:4-management").Build();
 
     public WebApplicationFactory<Program> Api { get; private set; } = null!;
     public IHost Worker { get; private set; } = null!;

@@ -9,6 +9,11 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
+  kafka:
+    image: apache/kafka:latest
+    ports:
+      - "9092:9092"
+
   postgres:
     image: postgres:17
     environment:
