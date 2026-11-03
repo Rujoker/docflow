@@ -147,7 +147,7 @@ Each milestone is tagged, so a tag shows the project at that step.
 | [v0.8.0](https://github.com/Rujoker/docflow/tree/v0.8.0) | MassTransit v8 variant for comparison (branch `masstransit`) | ✅ Done |
 | [v0.9.0](https://github.com/Rujoker/docflow/tree/v0.9.0) | Integration tests with Testcontainers | ✅ Done |
 | [v0.10.0](https://github.com/Rujoker/docflow/tree/v0.10.0) | Distributed tracing with OpenTelemetry and Jaeger | ✅ Done |
-| v0.11.0 | Kafka for analytics: partitioning, consumer groups, replay | ⏳ |
+| [v0.11.0](https://github.com/Rujoker/docflow/tree/v0.11.0) | Kafka for analytics: partitioning, consumer groups, replay | ✅ Done |
 | v1.0.0 | Delivery guarantees write-up | ⏳ |
 
 ## Notes on scope
